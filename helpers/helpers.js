@@ -48,7 +48,7 @@ app.handleRe=(req,res)=>{
 
       res.writeHead(statusCode);
       res.end(JSON.stringify(payLoad));
-    })
+    });
 
 
 
