@@ -1,4 +1,6 @@
 const http=require("http");
+
+const {handleRe}=require("./helpers/helpers")
 const app={};
 
 app.config={
@@ -11,8 +13,6 @@ app.createServer=()=>{
     ser.listen(app.config.port);
 }
 
-app.handleServer=(req,res)=>{
-    res.end("Hello this is my first node js project");
-}
+app.handleServer=handleRe;
 
 app.createServer();
