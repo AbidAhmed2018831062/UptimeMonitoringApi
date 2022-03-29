@@ -5,10 +5,15 @@ const en=require("./helpers/environment");
 
 const app={};
 
-lib.create("test","firstFile",{name:"Abid Ahmed",Uni:"Sust"},(err)=>{
+/*lib.create("test","firstFile",{name:"Abid Ahmed",Uni:"Sust"},(err)=>{
     console.log(err);
-});
-
+});*/
+/*lib.read("test","firstFile",(err)=>{
+    console.log(err);
+});*/
+lib.update("test","firstFile",{name:"Shakib Ahmed",Uni:"Sust"},(err)=>{
+    console.log(err);
+})
 app.createServer=()=>{
     const ser=http.createServer(app.handleServer);
      console.log(`listening to ${en.port}`);
