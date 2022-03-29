@@ -2,6 +2,7 @@ const http=require("http");
 
 const {handleRe}=require("./helpers/helpers");
 const en=require("./helpers/environment");
+const data=require("./lib/data");
 const app={};
 
 
