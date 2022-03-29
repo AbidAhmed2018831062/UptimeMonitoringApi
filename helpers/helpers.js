@@ -34,26 +34,20 @@ app.handleRe=(req,res)=>{
     req.on("end", ()=>{
   data+=ds.end();
   console.log(data);
+  chosenHandler(reqProper,(statusCode,payLoad)=>{
+    if(typeof(statusCode)!="number")
+    statuescode=500
+    if(typeof(payLoad)!="object")
+    payLoad={};
+
+    res.writeHead(statusCode);
+    res.end(JSON.stringify(payLoad));
+  });
  res.end("That is it for today");
     });
 
     const chosenHandler = routes[mainPath] ? routes[mainPath] : nonHandler;
-    
-
-    chosenHandler(reqProper,(statusCode,payLoad)=>{
-      if(typeof(statusCode)!="number")
-      statuescode=500
-      if(typeof(payLoad)!="object")
-      payLoad={};
-
-      res.writeHead(statusCode);
-      res.end(JSON.stringify(payLoad));
-    });
-
-
-
-
-    res.end("Hello this is my first node js project");
+     res.end("Hello this is my first node js project");
 };
 
 

@@ -1,16 +1,14 @@
 const http=require("http");
 
-const {handleRe}=require("./helpers/helpers")
+const {handleRe}=require("./helpers/helpers");
+const en=require("./helpers/environment");
 const app={};
 
-app.config={
-    port:3001,
-};
 
 app.createServer=()=>{
     const ser=http.createServer(app.handleServer);
-
-    ser.listen(app.config.port);
+     console.log(`listening to ${en.port}`);
+    ser.listen(en.port);
 }
 
 app.handleServer=handleRe;
