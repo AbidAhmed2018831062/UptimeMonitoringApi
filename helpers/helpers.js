@@ -43,7 +43,7 @@ app.handleRe=(req,res)=>{
     res.writeHead(statusCode);
     res.end(JSON.stringify(payLoad));
   });
- res.end("That is it for today");
+ //res.end("That is it for today");
     });
 
     const chosenHandler = routes[mainPath] ? routes[mainPath] : nonHandler;
