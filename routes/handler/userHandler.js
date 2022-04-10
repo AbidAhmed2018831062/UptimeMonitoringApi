@@ -90,10 +90,59 @@ console.log(phone);
 }
 app.user.put=(reqProper,callBack)=>
 {
-
+    const m=reqProper.body;
+    const firstName=typeof(m.firstName)==='string'&&m.firstName.trim().length>0? m.firstName : false;
+    const lastName=typeof(m.lastName)==='string'&&m.lastName.trim().length>0? m.lastName : false;
+    const phone=typeof(m.phone)==='string'&&m.phone.trim().length==11? m.phone : false;
+    const password=typeof(m.password)==='string'&&m.password.trim().length>0? m.password : false;
+     console.log(phone);
+    if(phone)
+    {
+        files.read("test",phone,(err,userData)=>
+        {
+            if(!err)
+            {
+                console.log(userData);
+                const u=jsonString(userData);
+                if(firstName)
+                {
+                    u.firstName=firstName;
+                }
+                if(lastName)
+                {
+                    u.lastName=lastName;
+                }
+                if(password)
+                {
+                    u.password=password
+                }
+           files.update("test",phone,u,(err)=>{
+               if(!err)
+               {
+                   callBack(200,{
+                       message:"Updated Successfully"
+                   })
+               }else
+               callBack(400,{
+                error:"Invalid phone"
+            })
+           })
+            }
+            else
+            callBack(400,{
+                error:"Invalid phone number"
+            })
+        })
+    }
+    else
+    callBack(400,{
+        error:"Invalid phone number"
+    })
+  
 }
 app.user.delete=(reqProper,callBack)=>
 {
-
+    const m=reqProper.body;
+    const phone=typeof(m.phone)==='string'&&m.phone.trim().length==11? m.phone : false;
 }
 module.exports=app;
