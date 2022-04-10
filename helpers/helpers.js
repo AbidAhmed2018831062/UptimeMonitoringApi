@@ -25,7 +25,7 @@ app.handleRe=(req,res)=>{
       head,
       method
     }
-
+    const chosenHandler = routes[mainPath] ? routes[mainPath] : nonHandler;
     let data="";
 
     req.on("data",(buffer)=>{
@@ -34,6 +34,7 @@ app.handleRe=(req,res)=>{
     req.on("end", ()=>{
   data+=ds.end();
   console.log(data);
+  reqProper.body=jsonString(data);
   chosenHandler(reqProper,(statusCode,payLoad)=>{
     if(typeof(statusCode)!="number")
     statuescode=500
@@ -46,8 +47,8 @@ app.handleRe=(req,res)=>{
  //res.end("That is it for today");
     });
 
-    const chosenHandler = routes[mainPath] ? routes[mainPath] : nonHandler;
-     res.end("Hello this is my first node js project");
+    
+   //  res.end("Hello this is my first node js project");
 };
 
 
