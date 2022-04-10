@@ -1,6 +1,6 @@
 
 const files=require('G:/NodeProjects/UptimeMonitoringApi/lib/data');
-const {hash}=require("G:/NodeProjects/UptimeMonitoringApi/helpers/uti.js");
+const {hash, jsonString}=require("G:/NodeProjects/UptimeMonitoringApi/helpers/uti.js");
 
 const app={};
 
@@ -27,7 +27,7 @@ app.user.post=(reqProper,callBack)=>
 
   if(firstName&&lastName&&phone&&password)
   {
-      console.log("Hello it is done");
+     // console.log("Hello it is done");
       files.read("test",phone,(err)=>{
           if(err)
           {
@@ -35,7 +35,7 @@ app.user.post=(reqProper,callBack)=>
                   firstName,
                   lastName,
                   phone,
-                  password
+                  password:hash(password)
               },(err1)=>
               {
                   if(err1)
@@ -66,7 +66,27 @@ app.user.post=(reqProper,callBack)=>
 }
 app.user.get=(reqProper,callBack)=>
 {
-    callBack(200,{message:"All Right"});
+    const phone=typeof(reqProper.query.phone)==='string'&&reqProper.query.phone.length==11? reqProper.query.phone: false;
+console.log(phone);
+    if(phone)
+    {
+        files.read("test", phone,(err,user)=>{
+            if(!err){
+                const u=jsonString(user);
+            callBack(200,{
+                firstName:u.firstName,
+                lastName:u.lastName,
+                phone:u.phone
+            })
+        }
+        else
+        {
+            callBack(200,{erro:"User does not exist"});
+        }
+        })
+    }
+    else
+    callBack(200,{erro:"User does not exist"});
 }
 app.user.put=(reqProper,callBack)=>
 {

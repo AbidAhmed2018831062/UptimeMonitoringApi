@@ -18,9 +18,7 @@ uti.jsonString=(str)=>{
 
 uti.hash=(str)=>{
     
-    const hash = crypto.createHmac('sha256', 'a secret');
-
-    hash.update(str);
+    const hash = crypto.createHmac('sha256', 'a secret').update(str).digest("hex");
     console.log(hash);
     return hash;
 }
