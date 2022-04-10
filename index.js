@@ -17,7 +17,12 @@ lib.update("test","firstFile",{name:"Shakib Ahmed",Uni:"Sust"},(err)=>{
 app.createServer=()=>{
     const ser=http.createServer(app.handleServer);
      console.log(`listening to ${en.port}`);
+     try{
     ser.listen(en.port);
+     }
+     catch{
+         
+     }
 }
 
 app.handleServer=handleRe;

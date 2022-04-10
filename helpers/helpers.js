@@ -3,6 +3,7 @@ const url=require("url");
 const { StringDecoder } = require('string_decoder');
 const {routes}=require("G:/NodeProjects/UptimeMonitoringApi/routes/index");
 const {nonHandler}=require("G:/NodeProjects/UptimeMonitoringApi/routes/handler/nonHandler");
+const {jsonString}=require("G:/NodeProjects/UptimeMonitoringApi/helpers/uti.js");
 app={};
 app.handleRe=(req,res)=>{
     const ds=new StringDecoder('utf-8');
@@ -33,16 +34,21 @@ app.handleRe=(req,res)=>{
     });
     req.on("end", ()=>{
   data+=ds.end();
-  console.log(data);
+  //console.log(data);
   reqProper.body=jsonString(data);
   chosenHandler(reqProper,(statusCode,payLoad)=>{
     if(typeof(statusCode)!="number")
     statuescode=500
     if(typeof(payLoad)!="object")
     payLoad={};
-
+    res.setHeader("Content-Type","application/json");
     res.writeHead(statusCode);
+    try{
     res.end(JSON.stringify(payLoad));
+    }
+    catch{
+
+    }
   });
  //res.end("That is it for today");
     });

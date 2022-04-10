@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "env": "^0.0.2"
+  },
+  "dependencies": {
+    "cucumber": "^6.0.5"
   }
 }
