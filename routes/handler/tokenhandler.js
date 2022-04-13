@@ -1,6 +1,6 @@
 
 const files=require('G:/NodeProjects/UptimeMonitoringApi/lib/data');
-const {hash, jsonString}=require("G:/NodeProjects/UptimeMonitoringApi/helpers/uti.js");
+const {hash, jsonString,randomString}=require("G:/NodeProjects/UptimeMonitoringApi/helpers/uti.js");
 
 const app={};
 
@@ -20,22 +20,25 @@ app.userHandler=(reqProper,callBack)=>{
 app.user.post=(reqProper,callBack)=>
 {
     const m=reqProper.body;
-  const firstName=typeof(m.firstName)==='string'&&m.firstName.trim().length>0? m.firstName : false;
-  const lastName=typeof(m.lastName)==='string'&&m.lastName.trim().length>0? m.lastName : false;
+  
   const phone=typeof(m.phone)==='string'&&m.phone.trim().length==11? m.phone : false;
   const password=typeof(m.password)==='string'&&m.password.trim().length>0? m.password : false;
 
-  if(firstName&&lastName&&phone&&password)
+  if(phone&&password)
   {
      // console.log("Hello it is done");
-      files.read("test",phone,(err)=>{
-          if(err)
+      files.read("token",phone,(err,data)=>{
+          if(!err&&data)
           {
-              files.create("test",phone,{
-                  firstName,
-                  lastName,
+              if(jsonString(data).password===hash(password)){
+            const tokenId=randomString(11);
+            const expires=Date.now()+60*60*1000;
+
+
+              files.create("token",tokenId,{
                   phone,
-                  password:hash(password)
+                  tokenId,
+                  expires,
               },(err1)=>
               {
                   if(err1)
@@ -46,9 +49,18 @@ app.user.post=(reqProper,callBack)=>
                   }
                   else
                   callBack(200,{
-                    error:"User created successfully"
+                    phone,
+                    tokenId,
+                    expires,
                 })
               })
+            }
+            else{
+                callBack(400,{
+                    error:"USer Already exists"
+                })
+            }
+
           }
           else
           {
