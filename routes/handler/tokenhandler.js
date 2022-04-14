@@ -67,21 +67,21 @@ app.user.post=(reqProper,callBack)=>
           {
               console.log("HEllo");
               callBack(400,{
-                  error:"USer Already exists"
+                  error:"User does not exist"
               })
           }
       })
   }
   else
   {
-
+   
   }
 }
 app.user.get=(reqProper,callBack)=>
 {
-    const id=typeof(reqProper.query.id)==='string'&&reqProper.query.phone.length==11? reqProper.query.phone: false;
-console.log(phone);
-    if(phone)
+    const id=typeof(reqProper.query.id)==='string'&&reqProper.query.id.length>0? reqProper.query.id: false;
+console.log(id);
+    if(id)
     {
         files.read("token", id,(err,user)=>{
             if(!err){
@@ -94,7 +94,7 @@ console.log(phone);
         }
         else
         {
-            callBack(200,{erro:"Id not found"});
+            callBack(200,{error:"Id not found"});
         }
         })
     }
@@ -152,14 +152,14 @@ app.user.put=(reqProper,callBack)=>
 app.user.delete=(reqProper,callBack)=>
 {
     const m=reqProper.body;
-    const phone=typeof(m.phone)==='string'&&m.phone.trim().length==11? m.phone : false;
+    const id=typeof(m.id)==='string'&&m.id.trim().length==11? m.id : false;
 
-    if(phone)
+    if(id)
     {
-        files.read("test",phone,(err,data)=>{
+        files.read("token",id,(err,data)=>{
             if(!err&&data)
             {
-              files.delete("test",phone,(err)=>{
+              files.delete("token",id,(err)=>{
                   if(!err)
                   {
                       callBack(200,{
@@ -169,7 +169,7 @@ app.user.delete=(reqProper,callBack)=>
                   else
                   {
                     
-                    callBack(500,{message:"Failed1"})
+                    callBack(500,{message:"Failed"})
                 
                   }
               })
