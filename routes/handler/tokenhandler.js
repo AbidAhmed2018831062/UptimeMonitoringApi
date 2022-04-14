@@ -4,7 +4,7 @@ const {hash, jsonString,randomString}=require("G:/NodeProjects/UptimeMonitoringA
 
 const app={};
 
-app.userHandler=(reqProper,callBack)=>{
+app.tokenHandler=(reqProper,callBack)=>{
 
     const meth=['get','post','put','delete'];
     if(meth.indexOf(reqProper.method)>-1)
@@ -27,10 +27,11 @@ app.user.post=(reqProper,callBack)=>
   if(phone&&password)
   {
      // console.log("Hello it is done");
-      files.read("token",phone,(err,data)=>{
-          if(!err&&data)
+      files.read("test",phone,(err,udata)=>{
+          if(!err&&udata)
           {
-              if(jsonString(data).password===hash(password)){
+              console.log(hash(password)+" "+jsonString(udata).password)
+              if(hash(password)===jsonString(udata).password){
             const tokenId=randomString(11);
             const expires=Date.now()+60*60*1000;
 
@@ -57,7 +58,7 @@ app.user.post=(reqProper,callBack)=>
             }
             else{
                 callBack(400,{
-                    error:"USer Already exists"
+                    error:"Error Happened"
                 })
             }
 
@@ -78,67 +79,63 @@ app.user.post=(reqProper,callBack)=>
 }
 app.user.get=(reqProper,callBack)=>
 {
-    const phone=typeof(reqProper.query.phone)==='string'&&reqProper.query.phone.length==11? reqProper.query.phone: false;
+    const id=typeof(reqProper.query.id)==='string'&&reqProper.query.phone.length==11? reqProper.query.phone: false;
 console.log(phone);
     if(phone)
     {
-        files.read("test", phone,(err,user)=>{
+        files.read("token", id,(err,user)=>{
             if(!err){
                 const u=jsonString(user);
             callBack(200,{
-                firstName:u.firstName,
-                lastName:u.lastName,
-                phone:u.phone
+                ID:u.tokenId,
+                Expires:u.expires,
+                phone:u.phone,
             })
         }
         else
         {
-            callBack(200,{erro:"User does not exist"});
+            callBack(200,{erro:"Id not found"});
         }
         })
     }
     else
-    callBack(200,{erro:"User does not exist"});
+    callBack(200,{erro:"Id not found"});
 }
 app.user.put=(reqProper,callBack)=>
 {
     const m=reqProper.body;
-    const firstName=typeof(m.firstName)==='string'&&m.firstName.trim().length>0? m.firstName : false;
-    const lastName=typeof(m.lastName)==='string'&&m.lastName.trim().length>0? m.lastName : false;
-    const phone=typeof(m.phone)==='string'&&m.phone.trim().length==11? m.phone : false;
-    const password=typeof(m.password)==='string'&&m.password.trim().length>0? m.password : false;
-     console.log(phone);
-    if(phone)
+    const id=typeof(m.id)==='string'&&m.id.trim().length>0? m.id : false;
+    const extend=typeof(m.extend)==='string'&&m.extend.trim().length>0? m.extend : false;
+    
+     console.log(id+""+extend);
+    if(id&&extend)
     {
-        files.read("test",phone,(err,userData)=>
+        files.read("token",id,(err,userData)=>
         {
             if(!err)
             {
                 console.log(userData);
                 const u=jsonString(userData);
-                if(firstName)
-                {
-                    u.firstName=firstName;
-                }
-                if(lastName)
-                {
-                    u.lastName=lastName;
-                }
-                if(password)
-                {
-                    u.password=password
-                }
-           files.update("test",phone,u,(err)=>{
-               if(!err)
+            if(u.expires>Date.now()){
+                u.expires=Date.now()+3600*1000;
+           files.update("token",id,u,(err)=>{
+               if(err)
                {
                    callBack(200,{
                        message:"Updated Successfully"
                    })
                }else
                callBack(400,{
-                error:"Invalid phone"
+                error:"Invalid token"
             })
            })
+           }
+           else{
+               
+            callBack(400,{
+                error:"Invalid Token or token expired"
+            })
+           }
             }
             else
             callBack(400,{
@@ -148,7 +145,7 @@ app.user.put=(reqProper,callBack)=>
     }
     else
     callBack(400,{
-        error:"Invalid phone number"
+        error:"Invalid token"
     })
   
 }
