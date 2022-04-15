@@ -9,15 +9,15 @@ app.tokenHandler=(reqProper,callBack)=>{
     const meth=['get','post','put','delete'];
     if(meth.indexOf(reqProper.method)>-1)
     {
-        app.user[reqProper.method](reqProper,callBack);
+        app.token[reqProper.method](reqProper,callBack);
     }
     else
     callBack(405,{message:"Not Allowed"});
 }
 
- app.user={};
+ app.token={};
 
-app.user.post=(reqProper,callBack)=>
+app.token.post=(reqProper,callBack)=>
 {
     const m=reqProper.body;
   
@@ -77,7 +77,7 @@ app.user.post=(reqProper,callBack)=>
    
   }
 }
-app.user.get=(reqProper,callBack)=>
+app.token.get=(reqProper,callBack)=>
 {
     const id=typeof(reqProper.query.id)==='string'&&reqProper.query.id.length>0? reqProper.query.id: false;
 console.log(id);
@@ -101,7 +101,7 @@ console.log(id);
     else
     callBack(200,{erro:"Id not found"});
 }
-app.user.put=(reqProper,callBack)=>
+app.token.put=(reqProper,callBack)=>
 {
     const m=reqProper.body;
     const id=typeof(m.id)==='string'&&m.id.trim().length>0? m.id : false;
@@ -149,7 +149,7 @@ app.user.put=(reqProper,callBack)=>
     })
   
 }
-app.user.delete=(reqProper,callBack)=>
+app.token.delete=(reqProper,callBack)=>
 {
     const m=reqProper.body;
     const id=typeof(m.id)==='string'&&m.id.trim().length==11? m.id : false;
@@ -184,11 +184,12 @@ app.user.delete=(reqProper,callBack)=>
 
 }
 
-app.user.verify=(id,phone,callback)=>{
+app.token.verify=(id,phone,callback)=>{
     files.read("token",id,(err,udata)=>{
      if(!err&&udata)
      {
          const da=jsonString(udata);
+
          if(da.tokenId==id&&da.phone==phone){
             
              callback(false);

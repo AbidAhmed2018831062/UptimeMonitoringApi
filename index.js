@@ -11,9 +11,8 @@ const app={};
 /*lib.read("test","firstFile",(err)=>{
     console.log(err);
 });*/
-lib.update("test","firstFile",{name:"Shakib Ahmed",Uni:"Sust"},(err)=>{
-    console.log(err);
-})
+/*lib.update("test","firstFile",{name:"Shakib Ahmed",Uni:"Sust"},(err)=>{
+    console.log(err);*/
 app.createServer=()=>{
     const ser=http.createServer(app.handleServer);
      console.log(`listening to ${en.port}`);

@@ -1,70 +1,108 @@
 
 const files=require('G:/NodeProjects/UptimeMonitoringApi/lib/data');
-const {hash, jsonString}=require("G:/NodeProjects/UptimeMonitoringApi/helpers/uti.js");
+const {hash, jsonString, randomString}=require("G:/NodeProjects/UptimeMonitoringApi/helpers/uti.js");
 const app1=require("G:/NodeProjects/UptimeMonitoringApi/routes/handler/tokenhandler");
 const app={};
 
-app.userHandler=(reqProper,callBack)=>{
+app.checkHandler=(reqProper,callBack)=>{
 
     const meth=['get','post','put','delete'];
     if(meth.indexOf(reqProper.method)>-1)
     {
-        app.user[reqProper.method](reqProper,callBack);
+        app.check[reqProper.method](reqProper,callBack);
     }
     else
     callBack(405,{message:"Not Allowed"});
 }
 
- app.user={};
+ app.check={};
 
-app.user.post=(reqProper,callBack)=>
+app.check.post=(reqProper,callBack)=>
 {
     const m=reqProper.body;
-  const firstName=typeof(m.firstName)==='string'&&m.firstName.trim().length>0? m.firstName : false;
-  const lastName=typeof(m.lastName)==='string'&&m.lastName.trim().length>0? m.lastName : false;
-  const phone=typeof(m.phone)==='string'&&m.phone.trim().length==11? m.phone : false;
-  const password=typeof(m.password)==='string'&&m.password.trim().length>0? m.password : false;
+  const protocol=typeof(m.protocol)==='string'&&['http','https'].indexOf(m.protocol)>-1? m.protocol : false;
+  const url=typeof(m.url)==='string'&&m.url.trim().length>0? m.url : false;
+  const method=typeof(m.method)==='string'&&['get','post','put','delete'].indexOf(m.method)>-1? m.method : false;
+  const successcodes=typeof(m.successcodes)==='object'&&m.successcodes instanceof Array? m.successcodes : false;
 
-  if(firstName&&lastName&&phone&&password)
+  const timeout=typeof(m.timeout)==='number'&&m.timeout>0&&m.timeout<=5&&m.timeout%1==0? m.timeout : false;
+console.log(protocol+""+url+""+timeout+""+successcodes);
+  if(protocol&&url&&timeout&&successcodes)
   {
-     // console.log("Hello it is done");
-      files.read("test",phone,(err)=>{
-          if(err)
-          {
-              files.create("test",phone,{
-                  firstName,
-                  lastName,
-                  phone,
-                  password:hash(password)
-              },(err1)=>
-              {
-                  if(err1)
-                  {
-                      callBack(400,{
-                          error:"Some error happened"
-                      })
-                  }
-                  else
-                  callBack(200,{
-                    error:"User created successfully"
-                })
-              })
-          }
-          else
-          {
-              console.log("HEllo");
-              callBack(400,{
-                  error:"USer Already exists"
-              })
-          }
-      })
+    const id=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
+files.read("token",id,(err,udata)=>{
+    console.log(udata);
+    if(!err&&udata)
+    {
+     let da1=jsonString(udata);
+     phone=da1.phone;
+console.log(phone);
+     files.read("test",phone,(err1,udata1)=>{
+         if(!err1&&udata1)
+         {
+             let da=jsonString(udata1);
+           app1.token.verify(id,phone,(err2)=>{
+               if(!err2)
+               {
+                   let ch=typeof(da.checks)==="object"&&da.checks instanceof Array? da.checks:[];
+                   console.log(da.checks+" "+ch)
+                   if(ch.length<5)
+                   {
+                    let checkId=randomString(11);
+
+                    files.create("check",checkId,{
+                        checkId,
+                        phone,
+                        timeout,
+                        method,
+                        successcodes,
+                        url,
+                        protocol
+                    },(err5)=>{
+                        if(!err5)
+                        {
+                          
+                            da.checks=ch;
+                         
+                            da.checks.push(checkId);
+                            files.update("test",phone,da,(err6)=>{
+                                if(!err6)
+                                {
+                                    callBack(200,{message:"Successful"});
+                                }
+                                else
+                                {
+                                    callBack(400,{error:"There was an error"});
+                                }
+                            })
+                            
+                           
+                        }
+                        else
+                        callBack(200,{error:"There was an error1"});
+                    })
+                   }
+               }
+               else
+               {
+                   callBack(200,{error:"There was an error2"});
+               }
+           })
+         }
+         else
+         callBack(200,{error:"There was an error3"});
+     })
+    }
+    else
+    callBack(405,{error:"you are not authenticated"})
+})
   }
   else
   {
-
+    callBack(400,{error:"There is a problem in your inputs!"})
   }
 }
-app.user.get=(reqProper,callBack)=>
+app.check.get=(reqProper,callBack)=>
 {
     const phone=typeof(reqProper.query.phone)==='string'&&reqProper.query.phone.length==11? reqProper.query.phone: false;
 
@@ -75,7 +113,7 @@ console.log(phone);
 
         const id=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
 
-        app1.token.verify(id,phone,(err)=>{
+        app1.user.verify(id,phone,(err)=>{
             if(!err)
             {
                 files.read("test", phone,(err,user)=>{
@@ -102,7 +140,7 @@ console.log(phone);
     else
     callBack(200,{erro:"User does not exist"});
 }
-app.user.put=(reqProper,callBack)=>
+app.check.put=(reqProper,callBack)=>
 {
     const m=reqProper.body;
     const firstName=typeof(m.firstName)==='string'&&m.firstName.trim().length>0? m.firstName : false;
@@ -114,7 +152,7 @@ app.user.put=(reqProper,callBack)=>
     {
         const id=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
 
-        app1.token.verify(id,phone,(err)=>{
+        app1.user.verify(id,phone,(err)=>{
             if(!err)
             {
                 files.read("test",phone,(err,userData)=>
@@ -164,7 +202,7 @@ app.user.put=(reqProper,callBack)=>
     })
   
 }
-app.user.delete=(reqProper,callBack)=>
+app.check.delete=(reqProper,callBack)=>
 {
     const m=reqProper.body;
     const phone=typeof(m.phone)==='string'&&m.phone.trim().length==11? m.phone : false;
@@ -173,7 +211,7 @@ app.user.delete=(reqProper,callBack)=>
     {
         const id=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
 
-        app1.token.verify(id,phone,(err)=>{
+        app1.user.verify(id,phone,(err)=>{
             if(!err)
             {
                 files.read("test",phone,(err,data)=>{
