@@ -1,7 +1,7 @@
 
 const files=require('G:/NodeProjects/UptimeMonitoringApi/lib/data');
 const {hash, jsonString}=require("G:/NodeProjects/UptimeMonitoringApi/helpers/uti.js");
-
+const app1=require("G:/NodeProjects/UptimeMonitoringApi/routes/handler/tokenhandler");
 const app={};
 
 app.userHandler=(reqProper,callBack)=>{
@@ -67,23 +67,37 @@ app.user.post=(reqProper,callBack)=>
 app.user.get=(reqProper,callBack)=>
 {
     const phone=typeof(reqProper.query.phone)==='string'&&reqProper.query.phone.length==11? reqProper.query.phone: false;
+
+
 console.log(phone);
     if(phone)
     {
-        files.read("test", phone,(err,user)=>{
-            if(!err){
-                const u=jsonString(user);
-            callBack(200,{
-                firstName:u.firstName,
-                lastName:u.lastName,
-                phone:u.phone
-            })
-        }
-        else
-        {
-            callBack(200,{erro:"User does not exist"});
-        }
+
+        const id=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
+
+        app1.user.verify(id,phone,(err)=>{
+            if(!err)
+            {
+                files.read("test", phone,(err,user)=>{
+                    if(!err){
+                        const u=jsonString(user);
+                    callBack(200,{
+                        firstName:u.firstName,
+                        lastName:u.lastName,
+                        phone:u.phone
+                    })
+                }
+                else
+                {
+                    callBack(200,{erro:"User does not exist"});
+                }
+                })
+            }
+            else
+            callBack(405,{erro:"You are not authenticated"});
         })
+
+       
     }
     else
     callBack(200,{erro:"User does not exist"});
@@ -98,41 +112,51 @@ app.user.put=(reqProper,callBack)=>
      console.log(phone);
     if(phone)
     {
-        files.read("test",phone,(err,userData)=>
-        {
+        const id=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
+
+        app1.user.verify(id,phone,(err)=>{
             if(!err)
             {
-                console.log(userData);
-                const u=jsonString(userData);
-                if(firstName)
+                files.read("test",phone,(err,userData)=>
                 {
-                    u.firstName=firstName;
-                }
-                if(lastName)
-                {
-                    u.lastName=lastName;
-                }
-                if(password)
-                {
-                    u.password=password
-                }
-           files.update("test",phone,u,(err)=>{
-               if(!err)
-               {
-                   callBack(200,{
-                       message:"Updated Successfully"
+                    if(!err)
+                    {
+                        console.log(userData);
+                        const u=jsonString(userData);
+                        if(firstName)
+                        {
+                            u.firstName=firstName;
+                        }
+                        if(lastName)
+                        {
+                            u.lastName=lastName;
+                        }
+                        if(password)
+                        {
+                            u.password=password
+                        }
+                   files.update("test",phone,u,(err)=>{
+                       if(!err)
+                       {
+                           callBack(200,{
+                               message:"Updated Successfully"
+                           })
+                       }else
+                       callBack(400,{
+                        error:"Invalid phone"
+                    })
                    })
-               }else
-               callBack(400,{
-                error:"Invalid phone"
-            })
-           })
+                    }
+                    else
+                    callBack(400,{
+                        error:"Invalid phone number"
+                    })
+                })
             }
             else
-            callBack(400,{
-                error:"Invalid phone number"
-            })
+            callBack(405,{erro:"You are not authenticated"});
         })
+
     }
     else
     callBack(400,{
@@ -147,28 +171,38 @@ app.user.delete=(reqProper,callBack)=>
 
     if(phone)
     {
-        files.read("test",phone,(err,data)=>{
-            if(!err&&data)
+        const id=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
+
+        app1.user.verify(id,phone,(err)=>{
+            if(!err)
             {
-              files.delete("test",phone,(err)=>{
-                  if(!err)
-                  {
-                      callBack(200,{
-                          message:"Deleted Successfully"
+                files.read("test",phone,(err,data)=>{
+                    if(!err&&data)
+                    {
+                      files.delete("test",phone,(err)=>{
+                          if(!err)
+                          {
+                              callBack(200,{
+                                  message:"Deleted Successfully"
+                              })
+                          }
+                          else
+                          {
+                            
+                            callBack(500,{message:"Failed1"})
+                        
+                          }
                       })
-                  }
-                  else
-                  {
-                    
-                    callBack(500,{message:"Failed1"})
+                    }
+                    else
+                    callBack(500,{message:"Failed"})
                 
-                  }
-              })
+                })
             }
             else
-            callBack(500,{message:"Failed"})
-        
+            callBack(405,{erro:"You are not authenticated"});
         })
+      
     }
     else
     callBack(400,{error:"There was an error"});

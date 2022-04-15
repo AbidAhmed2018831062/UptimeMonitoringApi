@@ -183,4 +183,21 @@ app.user.delete=(reqProper,callBack)=>
     callBack(400,{error:"There was an error"});
 
 }
+
+app.user.verify=(id,phone,callback)=>{
+    files.read("token",id,(err,udata)=>{
+     if(!err&&udata)
+     {
+         const da=jsonString(udata);
+         if(da.tokenId==id&&da.phone==phone){
+            
+             callback(false);
+         }
+         else
+         callback(true)
+     }
+     else
+     callback(true);
+    })
+}
 module.exports=app;
