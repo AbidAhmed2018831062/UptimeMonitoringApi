@@ -2,6 +2,7 @@
 const files=require('G:/NodeProjects/UptimeMonitoringApi/lib/data');
 const {hash, jsonString, randomString}=require("G:/NodeProjects/UptimeMonitoringApi/helpers/uti.js");
 const app1=require("G:/NodeProjects/UptimeMonitoringApi/routes/handler/tokenhandler");
+const { default: time } = require('cucumber/lib/time');
 const app={};
 
 app.checkHandler=(reqProper,callBack)=>{
@@ -104,38 +105,36 @@ console.log(phone);
 }
 app.check.get=(reqProper,callBack)=>
 {
-    const phone=typeof(reqProper.query.phone)==='string'&&reqProper.query.phone.length==11? reqProper.query.phone: false;
+    const id1=typeof(reqProper.query.id)==='string'&&reqProper.query.id.length==11? reqProper.query.id: false;
 
 
-console.log(phone);
-    if(phone)
+console.log(id1);
+    if(id1)
     {
 
-        const id=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
+        files.read("check",id1,(err,udata)=>{
+        if(!err&&udata)
+        {
+            let phone=jsonString(udata).phone;
+            const token=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
 
-        app1.user.verify(id,phone,(err)=>{
-            if(!err)
-            {
-                files.read("test", phone,(err,user)=>{
-                    if(!err){
-                        const u=jsonString(user);
-                    callBack(200,{
-                        firstName:u.firstName,
-                        lastName:u.lastName,
-                        phone:u.phone
+            files.read("token",token,(err,udata1)=>{
+                if(!err&&udata1){
+                    app1.token.verify(token,phone,(err)=>
+                    {
+                        if(!err)
+                        {
+                           callBack(200,jsonString(udata));
+                        }
+                        else
+                        callBack(405,{error:"You are not authenticated"});
                     })
                 }
-                else
-                {
-                    callBack(200,{erro:"User does not exist"});
-                }
-                })
-            }
-            else
-            callBack(405,{erro:"You are not authenticated"});
+            })
+        }
+        else
+        callBack(400,{erro:"There was an error"});
         })
-
-       
     }
     else
     callBack(200,{erro:"User does not exist"});
@@ -143,107 +142,121 @@ console.log(phone);
 app.check.put=(reqProper,callBack)=>
 {
     const m=reqProper.body;
-    const firstName=typeof(m.firstName)==='string'&&m.firstName.trim().length>0? m.firstName : false;
-    const lastName=typeof(m.lastName)==='string'&&m.lastName.trim().length>0? m.lastName : false;
-    const phone=typeof(m.phone)==='string'&&m.phone.trim().length==11? m.phone : false;
-    const password=typeof(m.password)==='string'&&m.password.trim().length>0? m.password : false;
-     console.log(phone);
-    if(phone)
+    const protocol=typeof(m.protocol)==='string'&&['http','https'].indexOf(m.protocol)>-1? m.protocol : false;
+    const url=typeof(m.url)==='string'&&m.url.trim().length>0? m.url : false;
+    const method=typeof(m.method)==='string'&&['get','post','put','delete'].indexOf(m.method)>-1? m.method : false;
+    const successcodes=typeof(m.successcodes)==='object'&&m.successcodes instanceof Array? m.successcodes : false;
+    const id=typeof(m.id)==='string'&&m.id.trim().length>0? m.id : false;
+    const timeout=typeof(m.timeout)==='number'&&m.timeout>0&&m.timeout<=5&&m.timeout%1==0? m.timeout : false;
+  console.log(protocol+""+url+""+timeout+""+successcodes);
+    if(protocol||url||timeout||successcodes||method)
     {
-        const id=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
-
-        app1.user.verify(id,phone,(err)=>{
-            if(!err)
+        files.read("check",id,(err,udata)=>{
+            if(!err&&udata)
             {
-                files.read("test",phone,(err,userData)=>
-                {
+                let phone=jsonString(udata).phone;
+                const token=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
+                app1.token.verify(token,phone,(err)=>{
                     if(!err)
                     {
-                        console.log(userData);
-                        const u=jsonString(userData);
-                        if(firstName)
+                        let u=jsonString(udata)
+                        if(protocol)
                         {
-                            u.firstName=firstName;
+                            u.protocol=protocol;
                         }
-                        if(lastName)
+                        if(successcodes)
                         {
-                            u.lastName=lastName;
+                            u.successcodes=successcodes;
                         }
-                        if(password)
+                        if(url)
                         {
-                            u.password=password
+                            u.url=url;
                         }
-                   files.update("test",phone,u,(err)=>{
-                       if(!err)
-                       {
-                           callBack(200,{
-                               message:"Updated Successfully"
-                           })
-                       }else
-                       callBack(400,{
-                        error:"Invalid phone"
-                    })
-                   })
+                        if(method)
+                        {
+                            u.method=method;
+                        }
+                        if(timeout)
+                        u.method=method;
+                        files.update("check",id,u,(err)=>{
+                            if(!err)
+                            {
+                                callBack(200,{message:"Successfully Updated"})
+                            }
+                            else
+                            callBack(405,{error:"There was an error"})
+                        })
                     }
-                    else
-                    callBack(400,{
-                        error:"Invalid phone number"
-                    })
                 })
             }
-            else
-            callBack(405,{erro:"You are not authenticated"});
         })
-
     }
     else
-    callBack(400,{
-        error:"Invalid phone number"
-    })
-  
+    callBack(400,{error:"There was a problem in your request"})
 }
 app.check.delete=(reqProper,callBack)=>
 {
-    const m=reqProper.body;
-    const phone=typeof(m.phone)==='string'&&m.phone.trim().length==11? m.phone : false;
+     const id1=typeof(reqProper.query.id)==='string'&&reqProper.query.id.length==11? reqProper.query.id: false;
 
-    if(phone)
+
+console.log(id1);
+    if(id1)
     {
-        const id=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
 
-        app1.user.verify(id,phone,(err)=>{
-            if(!err)
-            {
-                files.read("test",phone,(err,data)=>{
-                    if(!err&&data)
+        files.read("check",id1,(err,udata)=>{
+        if(!err&&udata)
+        {
+            let phone=jsonString(udata).phone;
+            const token=typeof(reqProper.head.id)==='string'&&reqProper.head.id.length==11? reqProper.head.id: false;
+
+            files.read("token",token,(err,udata1)=>{
+                if(!err&&udata1){
+                    app1.token.verify(token,phone,(err)=>
                     {
-                      files.delete("test",phone,(err)=>{
-                          if(!err)
-                          {
-                              callBack(200,{
-                                  message:"Deleted Successfully"
-                              })
-                          }
-                          else
-                          {
-                            
-                            callBack(500,{message:"Failed1"})
-                        
-                          }
-                      })
-                    }
-                    else
-                    callBack(500,{message:"Failed"})
-                
-                })
-            }
-            else
-            callBack(405,{erro:"You are not authenticated"});
+                        if(!err)
+                        {
+                          files.delete("check",id1,(err)=>{
+                           if(!err)
+                           {
+                               files.read("test",phone,(err,udata2)=>{
+                                   if(!err&&udata2){
+                                       let d=jsonString(udata2);
+                                       let ch=typeof(d.checks) ==="object"&&d.checks instanceof Array?d.checks:[];
+                                       let index=ch.indexOf(id1);
+                                       if(index>-1)
+                                       {
+                                           ch.splice(index,1);
+                                           d.checks=ch;
+                                           files.update("test",phone,d,(err)=>{
+                                               if(!err)
+                                               {
+                                                   callBack(200,{message:"Successfully deleted"});
+                                               }
+                                               else
+                                               callBack(405,{error:"there was an error!"});
+                                           })
+                                       }
+                                       else
+                                       {
+                                           callBack(405,{error:"there was an error!"});
+                                       }
+                                   }
+                               })
+                           }
+                          })
+                        }
+                        else
+                        callBack(405,{error:"You are not authenticated"});
+                    })
+                }
+            })
+        }
+        else
+        callBack(400,{erro:"There was an error"});
         })
-      
     }
     else
-    callBack(400,{error:"There was an error"});
+    callBack(200,{erro:"User does not exist"});
 
 }
 module.exports=app;
