@@ -3,6 +3,7 @@
     "env": "^0.0.2"
   },
   "dependencies": {
-    "cucumber": "^6.0.5"
+    "cucumber": "^6.0.5",
+    "twilio": "^3.76.1"
   }
 }
